@@ -1,0 +1,448 @@
+
+
+
+
+BFD Working Group                                                D. Katz
+Internet-Draft                                                       HPE
+Obsoletes: 5883 (if approved)                                    D. Ward
+Intended status: Standards Track                                        
+Expires: 4 January 2027                                      X. Min, Ed.
+                                                               ZTE Corp.
+                                                             3 July 2026
+
+
+      Bidirectional Forwarding Detection (BFD) for Multihop Paths
+                     draft-ietf-bfd-rfc5883-bis-01
+
+Abstract
+
+   This document describes the use of the Bidirectional Forwarding
+   Detection (BFD) protocol over multihop paths, including
+   unidirectional links.
+
+   This document obsoletes RFC 5883.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 4 January 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+
+
+
+
+
+
+
+
+
+Katz, et al.             Expires 4 January 2027                 [Page 1]
+
+Internet-Draft           BFD for Multihop Paths                July 2026
+
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+
+1.  Introduction
+
+   The Bidirectional Forwarding Detection (BFD) protocol [BFD] defines a
+   method for liveness detection of arbitrary paths between systems.
+   The BFD one-hop specification [BFD-1HOP] describes how to use BFD
+   across single hops of IPv4 and IPv6.
+
+   BFD can also be useful on arbitrary paths between systems, which may
+   span multiple network hops and follow unpredictable paths.
+   Furthermore, a pair of systems may have multiple paths between them
+   that may overlap.  This document describes methods for using BFD in
+   such scenarios.
+
+1.1.  Conventions Used in This Document
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+2.  Applicability
+
+   Please note that BFD is intended as an Operations, Administration,
+   and Maintenance (OAM) mechanism for connectivity check and connection
+   verification.  It is applicable for network-based services (e.g.
+   router-to-router, subscriber-to-gateway, LSP/circuit endpoints, and
+   service appliance failure detection).  In these scenarios it is
+   required that the operator correctly provision the rates at which BFD
+   is transmitted to avoid congestion (e.g link, I/O, CPU) and false
+   failure detection.  It is not applicable for application-to-
+   application failure detection across the Internet because it does not
+   have sufficient capability to do necessary congestion detection and
+   avoidance and therefore cannot prevent congestion collapse.  Host-to-
+   host or application-to-application deployment across the Internet
+   will require the encapsulation of BFD within a transport that
+   provides "TCP-friendly" [TFRC] behavior.
+
+
+
+
+Katz, et al.             Expires 4 January 2027                 [Page 2]
+
+Internet-Draft           BFD for Multihop Paths                July 2026
+
+
+3.  Issues
+
+   There are three primary issues in the use of BFD for multihop paths.
+   The first is security and spoofing; [BFD-1HOP] describes a
+   lightweight method of avoiding spoofing by requiring a Time to Live
+   (TTL)/Hop Limit of 255 on both transmit and receive, but this
+   obviously does not work across multiple hops.  The utilization of BFD
+   authentication addresses this issue.
+
+   The second, more subtle, issue is that of demultiplexing multiple BFD
+   sessions between the same pair of systems to the proper BFD session.
+   In particular, the first BFD packet received for a session may carry
+
+   a Your Discriminator value of zero, resulting in ambiguity as to
+   which session the packet should be associated.  Once the
+   discriminator values have been exchanged, all further packets are
+   demultiplexed to the proper BFD session solely by the contents of the
+   Your Discriminator field.
+
+   [BFD-1HOP] addresses this by requiring that multiple sessions
+   traverse independent physical or logical links -- the first packet is
+   demultiplexed based on the link over which it was received.  In the
+   more general case, this scheme cannot work, as two paths over which
+   BFD is running may overlap to an arbitrary degree (including the
+   first and/or last hop).
+
+   Finally, the Echo function MUST NOT be used over multiple hops.
+   Intermediate hops would route the packets back to the sender, and
+   connectivity through the entire path would not be possible to verify.
+
+4.  Demultiplexing Packets
+
+   There are a number of possibilities for addressing the demultiplexing
+   issue that may be used, depending on the application.
+
+4.1.  Totally Arbitrary Paths
+
+   It may be desired to use BFD for liveness detection over paths for
+   which no part of the route is known (or if known, may not be stable).
+   A straightforward approach to this problem is to limit BFD deployment
+   to a single session between a source/destination address pair.
+   Multiple sessions between the same pair of systems must have at least
+   one endpoint address distinct from one another.
+
+   In this scenario, the initial packet is demultiplexed to the
+   appropriate BFD session based on the source/destination address pair
+   when Your Discriminator is set to zero.
+
+
+
+
+Katz, et al.             Expires 4 January 2027                 [Page 3]
+
+Internet-Draft           BFD for Multihop Paths                July 2026
+
+
+   This approach is appropriate for general connectivity detection
+   between systems over routed paths and is also useful for OSPF Virtual
+   Links [OSPFv2] [OSPFv3].
+
+4.2.  Out-of-Band Discriminator Signaling
+
+   Another approach to the demultiplexing problem is to signal the
+   discriminator values in each direction through an out-of-band
+   mechanism prior to establishing the BFD session.  Once learned, the
+   discriminators are sent as usual in the BFD Control packets; no
+   packets with Your Discriminator set to zero are ever sent.  This
+   method is used by the BFD MPLS specification [BFD-MPLS].
+
+   This approach is advantageous because it allows BFD to be directed by
+   other system components that have knowledge of the paths in use, and
+   from the perspective of BFD implementation it is very simple.
+
+   The disadvantage is that it requires at least some level of BFD-
+   specific knowledge in parts of the system outside of BFD.
+
+4.3.  Unidirectional Links
+
+   Unidirectional links are classified as multihop paths because the
+   return path (which should exist at some level in order to make the
+   link useful) may be arbitrary, and the return paths for BFD sessions
+   protecting parallel unidirectional links may overlap or even be
+   identical.  (If two unidirectional links, one in each direction, are
+   to carry a single BFD session, this can be done using the single-hop
+   approach.)
+
+   Either of the two methods outlined earlier may be used in the
+   unidirectional link case, but a more general solution can be found
+   strictly within BFD and without addressing limitations.
+
+   The approach is similar to the one-hop specification, since the
+   unidirectional link is a single hop.  Let's define the two systems as
+   the Unidirectional Sender and the Unidirectional Receiver.  In this
+   approach, the Unidirectional Sender MUST operate in the Active role
+   (as defined in the base BFD specification), and the Unidirectional
+   Receiver MUST operate in the Passive role.
+
+
+
+
+
+
+
+
+
+
+
+Katz, et al.             Expires 4 January 2027                 [Page 4]
+
+Internet-Draft           BFD for Multihop Paths                July 2026
+
+
+   In the Passive role, by definition, the Unidirectional Receiver does
+   not transmit any BFD Control packets until it learns the
+   discriminator value in use by the other system (upon receipt of the
+   first BFD Control packet).  The Unidirectional Receiver demultiplexes
+   the first packet to the proper BFD session based on the physical or
+   logical link over which it was received.  This allows the receiver to
+   learn the remote discriminator value, which it then echoes back to
+   the sender in its own (arbitrarily routed) BFD Control packet, after
+   which time all packets are demultiplexed solely by discriminator.
+
+5.  Encapsulation
+
+   The encapsulation of BFD Control packets for multihop application in
+   IPv4 and IPv6 is identical to that defined in [BFD-1HOP], except that
+   the UDP destination port MUST have a value of 4784.  This can aid in
+   the demultiplexing and internal routing of incoming BFD packets.
+
+6.  Authentication
+
+   By their nature, multihop paths expose BFD to spoofing.  As the
+   number of hops increases, the exposure to attack grows.  As such,
+   implementations of BFD SHOULD utilize cryptographic authentication
+   over multihop paths to help mitigate denial-of-service attacks.
+
+7.  IANA Considerations
+
+   Port 4784 has been assigned by IANA for use with BFD Multihop
+   Control.
+
+8.  Security Considerations
+
+   As the number of hops increases, BFD becomes further exposed to
+   attack.  The use of strong forms of authentication is strongly
+   encouraged.
+
+   No additional security issues are raised in this document beyond
+   those that exist in the referenced BFD documents.
+
+9.  Implementation Status
+
+   [Note to the RFC Editor - remove this section before publication, as
+   well as remove the reference to [IMPL].
+
+   This section records the status of known implementations of the
+   protocol defined by this specification at the time of posting of this
+   Internet-Draft, and is based on a proposal described in [IMPL].  The
+   description of implementations in this section is intended to assist
+   the IETF in its decision processes in progressing drafts to RFCs.
+
+
+
+Katz, et al.             Expires 4 January 2027                 [Page 5]
+
+Internet-Draft           BFD for Multihop Paths                July 2026
+
+
+   Please note that the listing of any individual implementation here
+   does not imply endorsement by the IETF.  Furthermore, no effort has
+   been spent to verify the information presented here that was supplied
+   by IETF contributors.  This is not intended as, and must not be
+   construed to be, a catalog of available implementations or their
+   features.  Readers are advised to note that other implementations may
+   exist.
+
+   According to [IMPL], "this will allow reviewers and working groups to
+   assign due consideration to documents that have the benefit of
+   running code, which may serve as evidence of valuable experimentation
+   and feedback that have made the implemented protocols more mature.
+   It is up to the individual working groups to use this information as
+   they see fit".
+
+9.1.  ZTE Corporation
+
+   *  Organization: ZTE Corporation.
+
+   *  Implementation: ZTE Software Release ZXROSNGV15.10.10 used by
+      multiple types of ZTE Routers like ZTE ZXR10 M6000-4SE.
+
+   *  Maturity Level: Widely used in general terms.
+
+   *  Coverage: Partial.
+
+      The details of implemented features are as follows:
+
+      1.  Supported "MUST" level features - Section 4.3 "Unidirectional
+          Links" and Section 5 "Encapsulation".
+
+      2.  Supported "SHOULD" level features - Section 6
+          "Authentication".  The BFD authentication is implemented but
+          not widely used.
+
+      3.  Supported "MAY" level features - N/A.
+
+      The details of unimplemented features are as follows:
+
+      1.  Unsupported "MUST" level features - Section 3 "Issues".  The
+          unaffiliated BFD Echo is implemented when the Echo packets are
+          encapsulated within an SRH, which means the Echo function may
+          be used over multiple hops.
+
+      2.  Unsupported "SHOULD" level features - None.
+
+      3.  Unsupported "MAY" level features - N/A.
+
+
+
+
+Katz, et al.             Expires 4 January 2027                 [Page 6]
+
+Internet-Draft           BFD for Multihop Paths                July 2026
+
+
+   *  Version: RFC5883
+
+   *  Licensing: N/A
+
+   *  Implementation experience: As to BFD Echo function, affiliated BFD
+      Echo is not implemented, and unaffiliated BFD Echo is implemented.
+
+   *  Contact: Zhao Yanhua - zhao.yanhua3@zte.com.cn
+
+   *  Last updated: May 13, 2026
+
+10.  Acknowledgements
+
+   The authors would like to acknowledge Jeffrey Haas, Reshad Rahman,
+   and Ketan Talaulikar for their guidance on this work.
+
+11.  References
+
+11.1.  Normative References
+
+   [BFD]      Katz, D. and D. Ward, "Bidirectional Forwarding Detection
+              (BFD)", RFC 5880, DOI 10.17487/RFC5880, June 2010,
+              <https://www.rfc-editor.org/info/rfc5880>.
+
+   [BFD-1HOP] Katz, D. and D. Ward, "Bidirectional Forwarding Detection
+              (BFD) for IPv4 and IPv6 (Single Hop)", RFC 5881,
+              DOI 10.17487/RFC5881, June 2010,
+              <https://www.rfc-editor.org/info/rfc5881>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+11.2.  Informative References
+
+   [BFD-MPLS] Aggarwal, R., Kompella, K., Nadeau, T., and G. Swallow,
+              "Bidirectional Forwarding Detection (BFD) for MPLS Label
+              Switched Paths (LSPs)", RFC 5884, DOI 10.17487/RFC5884,
+              June 2010, <https://www.rfc-editor.org/info/rfc5884>.
+
+
+
+
+
+
+
+Katz, et al.             Expires 4 January 2027                 [Page 7]
+
+Internet-Draft           BFD for Multihop Paths                July 2026
+
+
+   [IMPL]     Sheffer, Y. and A. Farrel, "Improving Awareness of Running
+              Code: The Implementation Status Section", BCP 205,
+              RFC 7942, DOI 10.17487/RFC7942, July 2016,
+              <https://www.rfc-editor.org/info/rfc7942>.
+
+   [OSPFv2]   Moy, J., "OSPF Version 2", STD 54, RFC 2328,
+              DOI 10.17487/RFC2328, April 1998,
+              <https://www.rfc-editor.org/info/rfc2328>.
+
+   [OSPFv3]   Coltun, R., Ferguson, D., Moy, J., and A. Lindem, "OSPF
+              for IPv6", RFC 5340, DOI 10.17487/RFC5340, July 2008,
+              <https://www.rfc-editor.org/info/rfc5340>.
+
+   [TFRC]     Floyd, S., Handley, M., Padhye, J., and J. Widmer, "TCP
+              Friendly Rate Control (TFRC): Protocol Specification",
+              RFC 5348, DOI 10.17487/RFC5348, September 2008,
+              <https://www.rfc-editor.org/info/rfc5348>.
+
+Authors' Addresses
+
+   Dave Katz
+   HPE
+   United States of America
+   Email: david.katz@hpe.com
+
+
+   Dave Ward
+   United States of America
+   Email: dward@bgp.nu
+
+
+   Xiao Min (editor)
+   ZTE Corp.
+   Nanjing
+   China
+   Email: xiao.min2@zte.com.cn
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Katz, et al.             Expires 4 January 2027                 [Page 8]
