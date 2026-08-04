@@ -6,9 +6,9 @@ BFD Working Group                                                D. Katz
 Internet-Draft                                                       HPE
 Obsoletes: 5883 (if approved)                                    D. Ward
 Intended status: Standards Track                                        
-Expires: 4 January 2027                                      X. Min, Ed.
+Expires: 5 February 2027                                     X. Min, Ed.
                                                                ZTE Corp.
-                                                             3 July 2026
+                                                           4 August 2026
 
 
       Bidirectional Forwarding Detection (BFD) for Multihop Paths
@@ -37,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 January 2027.
+   This Internet-Draft will expire on 5 February 2027.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Katz, et al.             Expires 4 January 2027                 [Page 1]
+Katz, et al.             Expires 5 February 2027                [Page 1]
 
-Internet-Draft           BFD for Multihop Paths                July 2026
+Internet-Draft           BFD for Multihop Paths              August 2026
 
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -109,9 +109,9 @@ Internet-Draft           BFD for Multihop Paths                July 2026
 
 
 
-Katz, et al.             Expires 4 January 2027                 [Page 2]
+Katz, et al.             Expires 5 February 2027                [Page 2]
 
-Internet-Draft           BFD for Multihop Paths                July 2026
+Internet-Draft           BFD for Multihop Paths              August 2026
 
 
 3.  Issues
@@ -165,9 +165,9 @@ Internet-Draft           BFD for Multihop Paths                July 2026
 
 
 
-Katz, et al.             Expires 4 January 2027                 [Page 3]
+Katz, et al.             Expires 5 February 2027                [Page 3]
 
-Internet-Draft           BFD for Multihop Paths                July 2026
+Internet-Draft           BFD for Multihop Paths              August 2026
 
 
    This approach is appropriate for general connectivity detection
@@ -221,9 +221,9 @@ Internet-Draft           BFD for Multihop Paths                July 2026
 
 
 
-Katz, et al.             Expires 4 January 2027                 [Page 4]
+Katz, et al.             Expires 5 February 2027                [Page 4]
 
-Internet-Draft           BFD for Multihop Paths                July 2026
+Internet-Draft           BFD for Multihop Paths              August 2026
 
 
    In the Passive role, by definition, the Unidirectional Receiver does
@@ -277,9 +277,9 @@ Internet-Draft           BFD for Multihop Paths                July 2026
 
 
 
-Katz, et al.             Expires 4 January 2027                 [Page 5]
+Katz, et al.             Expires 5 February 2027                [Page 5]
 
-Internet-Draft           BFD for Multihop Paths                July 2026
+Internet-Draft           BFD for Multihop Paths              August 2026
 
 
    Please note that the listing of any individual implementation here
@@ -333,9 +333,9 @@ Internet-Draft           BFD for Multihop Paths                July 2026
 
 
 
-Katz, et al.             Expires 4 January 2027                 [Page 6]
+Katz, et al.             Expires 5 February 2027                [Page 6]
 
-Internet-Draft           BFD for Multihop Paths                July 2026
+Internet-Draft           BFD for Multihop Paths              August 2026
 
 
    *  Version: RFC5883
@@ -389,9 +389,9 @@ Internet-Draft           BFD for Multihop Paths                July 2026
 
 
 
-Katz, et al.             Expires 4 January 2027                 [Page 7]
+Katz, et al.             Expires 5 February 2027                [Page 7]
 
-Internet-Draft           BFD for Multihop Paths                July 2026
+Internet-Draft           BFD for Multihop Paths              August 2026
 
 
    [IMPL]     Sheffer, Y. and A. Farrel, "Improving Awareness of Running
@@ -445,4 +445,4 @@ Authors' Addresses
 
 
 
-Katz, et al.             Expires 4 January 2027                 [Page 8]
+Katz, et al.             Expires 5 February 2027                [Page 8]
